@@ -1,0 +1,8 @@
+.env
+.env.*
+*.env
+postgres.env
+product-service.env
+cart-service.env
+inventory-service.env
+frontend.env

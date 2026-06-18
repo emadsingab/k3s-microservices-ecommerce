@@ -1,55 +1,78 @@
-package com.devops.ecommerce.product;
-
-import java.util.List;
+package com.ecommerce.products;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
+/*
+ * ProductController is the API layer.
+ *
+ * It receives HTTP requests from frontend/nginx and returns JSON responses.
+ *
+ * DEVOPS CHANGE:
+ * Before:
+ * - Controller returned products from a static in-memory list.
+ *
+ * After:
+ * - Controller calls ProductRepository.
+ * - ProductRepository reads products from PostgreSQL.
+ *
+ * Frontend does not need to change because the endpoint and JSON shape stay the same.
+ */
 @RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/products")
 public class ProductController {
-    private final ProductRepository repository;
+
+    private final ProductRepository productRepository;
     private final Counter productListRequests;
     private final Counter productDetailsRequests;
-    private final Counter categoryRequests;
 
-    public ProductController(ProductRepository repository, MeterRegistry meterRegistry) {
-        this.repository = repository;
+    public ProductController(ProductRepository productRepository, MeterRegistry meterRegistry) {
+        this.productRepository = productRepository;
+
+        /*
+         * Observability:
+         * Custom Prometheus counter for product list API requests.
+         *
+         * Available later from:
+         * /actuator/prometheus
+         */
         this.productListRequests = Counter.builder("ecommerce_product_list_requests_total")
-            .description("Total number of product list requests")
-            .register(meterRegistry);
+                .description("Total product list requests")
+                .register(meterRegistry);
+
+        /*
+         * Observability:
+         * Custom Prometheus counter for product details API requests.
+         */
         this.productDetailsRequests = Counter.builder("ecommerce_product_details_requests_total")
-            .description("Total number of product details requests")
-            .register(meterRegistry);
-        this.categoryRequests = Counter.builder("ecommerce_product_category_requests_total")
-            .description("Total number of category list requests")
-            .register(meterRegistry);
+                .description("Total product details requests")
+                .register(meterRegistry);
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public List<Product> getProducts() {
         productListRequests.increment();
-        return repository.findAll();
+
+        /*
+         * DEVOPS CHANGE:
+         * This now reads from PostgreSQL through JPA repository.
+         */
+        return productRepository.findAll();
     }
 
-    @GetMapping("/products/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public Product getProductById(@PathVariable Long id) {
         productDetailsRequests.increment();
-        return repository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
-    }
 
-    @GetMapping("/categories")
-    public List<String> getCategories() {
-        categoryRequests.increment();
-        return repository.findCategories();
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Product not found with id: " + id
+                ));
     }
 }
