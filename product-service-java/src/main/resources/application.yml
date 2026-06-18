@@ -1,19 +1,33 @@
 server:
-  port: ${SERVER_PORT:8081}
+  port: 8081
 
 spring:
   application:
     name: product-service-java
 
+  datasource:
+    # DEVOPS CHANGE:
+    # No database credentials are hardcoded in source code.
+    # Values must be injected at runtime using environment variables,
+    # Docker env-file, Docker Compose env vars, or Kubernetes Secret.
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,prometheus,metrics
+
   endpoint:
     health:
       show-details: always
-  prometheus:
-    metrics:
-      export:
-        enabled: true
