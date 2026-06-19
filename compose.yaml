@@ -1,0 +1,89 @@
+services:
+  ecommerce-postgres:
+    image: postgres:16-alpine
+    container_name: ecommerce-postgres
+    env_file:
+      - postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-private-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecommerce -d ecommerce"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  product-service-java:
+    image: emadsingab/ecommerce-product-service-java:v1
+    build:
+      context: ./product-service-java
+      dockerfile: Dockerfile
+    container_name: product-service-java
+    ports:
+      - "8081:8081"
+    networks:
+      - ecommerce-private-network
+    env_file:
+      - product-service.env
+    depends_on:
+      ecommerce-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cart-service-node:
+    image: emadsingab/ecommerce-cart-service-node:v1
+    build:
+      context: ./cart-service-node
+      dockerfile: Dockerfile
+    container_name: cart-service-node
+    ports:
+      - "8082:8082"
+    networks:
+      - ecommerce-private-network
+    restart: unless-stopped
+
+  inventory-service-go:
+    image: emadsingab/ecommerce-inventory-service-go:v1
+    build:
+      context: ./inventory-service-go
+      dockerfile: Dockerfile
+    container_name: inventory-service-go
+    ports:
+      - "8083:8083"
+    networks:
+      - ecommerce-private-network
+    restart: unless-stopped
+
+  frontend:
+    image: emadsingab/ecommerce-frontend:v1
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "8080:80"
+    networks:
+      - ecommerce-public-network
+      - ecommerce-private-network
+    depends_on:
+      - product-service-java
+      - cart-service-node
+      - inventory-service-go
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  ecommerce-public-network:
+    name: ecommerce-public-network
+    driver: bridge
+
+  ecommerce-private-network:
+    name: ecommerce-private-network
+    driver: bridge
+    internal: true
