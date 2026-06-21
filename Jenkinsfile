@@ -52,32 +52,32 @@ pipeline {
         sh """
         
         # Ensure namespace exists
-        kubectl create namespace microservices-test || true
+        kubectl create namespace microservices || true
 
         # 1. Deploy Product Service
         helm upgrade --install product-app ./charts/product-service \
-          --namespace microservices-test \
+          --namespace microservices \
           --create-namespace \
           --set image.repository=$DOCKERHUB_USER/ecommerce-product-service-java \
           --set image.tag=${IMAGE_TAG}
 
         # 2. Deploy Cart Service
         helm upgrade --install cart-app ./charts/cart-service \
-          --namespace microservices-test \
+          --namespace microservices \
           --create-namespace \
           --set image.repository=$DOCKERHUB_USER/ecommerce-cart-service-node \
           --set image.tag=${IMAGE_TAG}
 
         # 3. Deploy Inventory Service
         helm upgrade --install inventory-app ./charts/inventory-service \
-          --namespace microservices-test \
+          --namespace microservices \
           --create-namespace \
           --set image.repository=$DOCKERHUB_USER/ecommerce-inventory-service-go \
           --set image.tag=${IMAGE_TAG}
 
         # 4. Deploy Frontend
         helm upgrade --install frontend-app ./charts/frontend-service \
-          --namespace microservices-test \
+          --namespace microservices \
           --create-namespace \
           --set image.repository=$DOCKERHUB_USER/ecommerce-frontend \
           --set image.tag=${IMAGE_TAG} \
