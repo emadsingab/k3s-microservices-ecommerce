@@ -51,9 +51,6 @@ pipeline {
     steps {
         sh """
         
-        # Ensure namespace exists
-        kubectl create namespace microservices-test || true
-
         # 1. Deploy Product Service
         helm upgrade --install product-app ./charts/product-service \
           --namespace microservices-test \
