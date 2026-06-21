@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_USER = "emadsingab"
+        DOCKERHUB_USER = "emadsingab"
         IMAGE_TAG = "${BUILD_NUMBER}"
         REPO = "https://github.com/emadsingab/k3s-microservices-ecommerce.git"
     }
@@ -18,9 +18,9 @@ pipeline {
         stage('Build Backend Images') {
             steps {
                 sh """
-                docker build -t $DOCKER_USER/ecommerce-product-service-java:$IMAGE_TAG ./product-service-java
-                docker build -t $DOCKER_USER/ecommerce-cart-service-node:$IMAGE_TAG ./cart-service-node
-                docker build -t $DOCKER_USER/ecommerce-inventory-service-go:$IMAGE_TAG ./inventory-service-go
+                docker build -t $DOCKERHUB_USER/ecommerce-product-service-java:${IMAGE_TAG} ./product-service-java
+                docker build -t $DOCKERHUB_USER/ecommerce-cart-service-node:${IMAGE_TAG} ./cart-service-node
+                docker build -t $DOCKERHUB_USER/ecommerce-inventory-service-go:${IMAGE_TAG} ./inventory-service-go
                 """
             }
         }
@@ -28,7 +28,16 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 sh """
-                docker build -t $DOCKER_USER/ecommerce-frontend:$IMAGE_TAG ./frontend
+                docker build -t $DOCKERHUB_USER/ecommerce-frontend:${IMAGE_TAG} ./frontend
+                """
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                sh """
+                echo "PLEASE LOGIN MANUALLY ON JENKINS NODE FIRST"
+                docker info
                 """
             }
         }
@@ -36,10 +45,10 @@ pipeline {
         stage('Push Images') {
             steps {
                 sh """
-                docker push $DOCKER_USER/ecommerce-product-service-java:$IMAGE_TAG
-                docker push $DOCKER_USER/ecommerce-cart-service-node:$IMAGE_TAG
-                docker push $DOCKER_USER/ecommerce-inventory-service-go:$IMAGE_TAG
-                docker push $DOCKER_USER/ecommerce-frontend:$IMAGE_TAG
+                docker push $DOCKERHUB_USER/ecommerce-product-service-java:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-cart-service-node:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-inventory-service-go:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-frontend:${IMAGE_TAG}
                 """
             }
         }
@@ -48,10 +57,10 @@ pipeline {
             steps {
                 sh """
                 helm upgrade --install ecommerce ./helm/ecommerce \
-                --set productService.image=$DOCKER_USER/ecommerce-product-service-java:$IMAGE_TAG \
-                --set cartService.image=$DOCKER_USER/ecommerce-cart-service-node:$IMAGE_TAG \
-                --set inventoryService.image=$DOCKER_USER/ecommerce-inventory-service-go:$IMAGE_TAG \
-                --set frontend.image=$DOCKER_USER/ecommerce-frontend:$IMAGE_TAG
+                --set productService.image=$DOCKERHUB_USER/ecommerce-product-service-java:${IMAGE_TAG} \
+                --set cartService.image=$DOCKERHUB_USER/ecommerce-cart-service-node:${IMAGE_TAG} \
+                --set inventoryService.image=$DOCKERHUB_USER/ecommerce-inventory-service-go:${IMAGE_TAG} \
+                --set frontend.image=$DOCKERHUB_USER/ecommerce-frontend:${IMAGE_TAG}
                 """
             }
         }
