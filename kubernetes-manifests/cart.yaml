@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product
+  name: cart
   labels:
-    app: product
+    app: cart
 spec:
   replicas: 3
   strategy:
@@ -13,30 +13,30 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: product
+      app: cart
   template:
     metadata:
       labels:
-        app: product
+        app: cart
     spec:
       containers:
-        - name: product
-          image: emadsingab/ecommerce-product-service-java:v1
+        - name: cart
+          image: emadsingab/ecommerce-cart-service-node:v1
           imagePullPolicy: Always
           ports:
-            - containerPort: 8081
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8081
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8081
-            initialDelaySeconds: 15
-            periodSeconds: 20
+            - containerPort: 8082
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 80
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 80
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 20
           resources:
             requests:
               cpu: "100m"
@@ -53,12 +53,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: product-service-java
+  name: cart-service-node
 spec:
   type: ClusterIP
   selector:
-    app: product
+    app: cart
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8082
+      targetPort: 8082
       protocol: TCP
