@@ -1,0 +1,30 @@
+# postgres-service/values.yaml
+namespace: microservices
+
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+
+database:
+  name: ecommerce
+  user: ecommerce
+  password: ecommerce_pass # Helm will base64 encode this securely in the template
+
+persistence:
+  size: 1Gi
+  mountPath: /var/lib/postgresql/data
+
+service:
+  port: 5432
+
+# Added safety boundaries to prevent the database from crashing the node
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"

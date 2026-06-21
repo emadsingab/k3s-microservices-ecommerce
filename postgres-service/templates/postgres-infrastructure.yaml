@@ -1,0 +1,94 @@
+# postgres-service/templates/postgres-infrastructure.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-postgres-data-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecommerce-postgres-env
+  namespace: {{ .Values.namespace }}
+type: Opaque
+data:
+  # The b64enc pipeline automatically encodes your plain-text values
+  POSTGRES_PASSWORD: {{ .Values.database.password | b64enc }}
+  SPRING_DATASOURCE_PASSWORD: {{ .Values.database.password | b64enc }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: {{ .Values.namespace }}
+data:
+  POSTGRES_DB: {{ .Values.database.name }}
+  POSTGRES_USER: {{ .Values.database.user }}
+  SPRING_DATASOURCE_URL: jdbc:postgresql://{{ .Release.Name }}-ecommerce-postgres:{{ .Values.service.port }}/{{ .Values.database.name }}
+  SPRING_DATASOURCE_USERNAME: {{ .Values.database.user }}
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ecommerce-postgres
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-ecommerce-postgres
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ecommerce-postgres
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ecommerce-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu | quote }}
+              memory: {{ .Values.resources.requests.memory | quote }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu | quote }}
+              memory: {{ .Values.resources.limits.memory | quote }}
+          
+          envFrom:
+            - secretRef:
+                name: ecommerce-postgres-env
+            - configMapRef:
+                name: ecommerce-config
+          volumeMounts:
+            - name: postgres-data
+              mountPath: {{ .Values.persistence.mountPath }}
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-postgres-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-ecommerce-postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Release.Name }}-ecommerce-postgres
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
