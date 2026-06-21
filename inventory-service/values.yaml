@@ -1,0 +1,37 @@
+namespace: microservices
+
+replicaCount: 3
+
+image:
+  repository: emadsingab/ecommerce-inventory-service-go
+  tag: "v1"
+  pullPolicy: Always
+
+service:
+  name: inventory-service-go
+  port: 8083
+  targetPort: 8083
+
+probes:
+  path: /health
+  # Go starts up almost instantly, so we don't need a massive initial delay
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+env:
+  type: production
+
+# If this Go service needs to connect to the Postgres database, 
+# you can enable this block. Otherwise, leave it false.
+databaseConfig:
+  enabled: false
+  configMapName: ecommerce-config
+  secretName: ecommerce-postgres-env

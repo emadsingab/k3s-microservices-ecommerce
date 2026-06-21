@@ -1,0 +1,32 @@
+namespace: microservices
+
+replicaCount: 3
+
+image:
+  repository: emadsingab/ecommerce-cart-service-node
+  tag: "v1"
+  pullPolicy: Always
+
+service:
+  name: cart-service-node
+  port: 8082
+  targetPort: 8082
+  affinity:
+    enabled: true
+    timeoutSeconds: 10800
+
+probes:
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"  # Slightly elevated for Node.js stability
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+env:
+  type: production
