@@ -4,9 +4,9 @@ metadata:
   name: frontend
   labels:
     app: frontend
+  namespace: microservices
 spec:
   replicas: 3
-  namespace: microservices
   strategy:
     type: RollingUpdate
     rollingUpdate:

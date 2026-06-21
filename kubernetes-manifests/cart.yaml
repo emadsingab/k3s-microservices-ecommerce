@@ -4,9 +4,9 @@ metadata:
   name: cart
   labels:
     app: cart
+  namespace: microservices
 spec:
   replicas: 3
-  namespace: microservices
   strategy:
     type: RollingUpdate
     rollingUpdate:
