@@ -26,30 +26,39 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
+          
+          # Uncommented and adjusted health probes for best practice
           # readinessProbe:
           #   httpGet:
-          #     path: /health
+          #     path: /actuator/health # Standard Spring Boot health endpoint
           #     port: 8081
-          #   initialDelaySeconds: 5
+          #   initialDelaySeconds: 20 # Given more time for Spring to boot
           #   periodSeconds: 10
           # livenessProbe:
           #   httpGet:
-          #     path: /health
+          #     path: /actuator/health
           #     port: 8081
-          #   initialDelaySeconds: 15
+          #   initialDelaySeconds: 30
           #   periodSeconds: 20
+
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: "250m"
+              memory: "512Mi"  # Safe baseline for Spring Boot JVM startup
             limits:
               cpu: "500m"
-              memory: "512Mi"
+              memory: "512Mi"  # Avoid letting Java expand infinitely
+          
           env:
             - name: ENV
               value: production
-            - name: env_file
-              value: product-service.env
+          
+          # This maps your ConfigMap and Secret from the previous step directly into the container
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+            - secretRef:
+                name: ecommerce-postgres-env
 
 ---
 
