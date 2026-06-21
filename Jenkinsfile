@@ -35,10 +35,11 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                sh """
-                echo "PLEASE LOGIN MANUALLY ON JENKINS NODE FIRST"
-                docker info
-                """
+                withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                    echo $PASS | docker login -u $USER --password-stdin
+                    """
+                }
             }
         }
 
