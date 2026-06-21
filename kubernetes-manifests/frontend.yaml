@@ -6,6 +6,7 @@ metadata:
     app: frontend
 spec:
   replicas: 3
+  namespace: microservices
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -54,6 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
+  namespace: microservices
 spec:
   type: ClusterIP
   selector:

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: inventory
+  namespace: microservices
   labels:
     app: inventory
 spec:
@@ -54,6 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: inventory-service-go
+  namespace: microservices  
 spec:
   type: ClusterIP
   selector:
