@@ -37,4 +37,4 @@ env:
 # References to your pre-existing infrastructure configurations
 externalConfigs:
   configMapName: ecommerce-config
-  secretName: ecommerce-postgres-env
+  secretName: ecommerce-secret

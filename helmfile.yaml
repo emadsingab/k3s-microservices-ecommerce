@@ -6,23 +6,11 @@ environments:
 ---
 
 releases:
-  # 1. The Database Layer
-  - name: db-core
-    namespace: {{ .Values.namespace }}
-    chart: ./charts/postgres-service
-    # This explicitly overrides the value inside postgres-service/values.yaml
-    set:
-      - name: namespace
-        value: {{ .Values.namespace }}
-    labels:
-      tier: database
 
   # 2. The Backend Layer
   - name: product-app
     namespace: {{ .Values.namespace }}
     chart: ./charts/product-service
-    needs:
-      - {{ .Values.namespace }}/db-core
     set:
       - name: namespace
         value: {{ .Values.namespace }}
@@ -32,8 +20,6 @@ releases:
   - name: inventory-app
     namespace: {{ .Values.namespace }}
     chart: ./charts/inventory-service
-    needs:
-      - {{ .Values.namespace }}/db-core
     set:
       - name: namespace
         value: {{ .Values.namespace }}

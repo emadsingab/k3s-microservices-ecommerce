@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.externalConfigs.configMapName }}
+  namespace: {{ .Values.namespace }}
+
+data:
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  # عدلنا اسم الداتا بيز هنا لـ postgres
+  SPRING_DATASOURCE_URL: jdbc:postgresql://database-1.co5soaciu1wz.us-east-1.rds.amazonaws.com:5432/postgres
+  SPRING_DATASOURCE_USERNAME: postgres
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
