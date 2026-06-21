@@ -27,19 +27,24 @@ spec:
           ports:
             - containerPort: 8081
           
-          # Uncommented and adjusted health probes for best practice
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Standard Spring Boot health endpoint
-          #     port: 8081
-          #   initialDelaySeconds: 20 # Given more time for Spring to boot
-          #   periodSeconds: 10
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: 8081
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            failureThreshold: 12
+            periodSeconds: 5  # Gives it up to 60 seconds (12 * 5) to boot up smoothly
+            
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            periodSeconds: 10
+            
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            periodSeconds: 20
 
           resources:
             requests:
