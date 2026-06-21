@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-rds
+  labels:
+    app: product-rds
+  namespace: microservices
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: product-rds
+  template:
+    metadata:
+      labels:
+        app: product-rds
+    spec:
+      containers:
+        - name: product
+          image: emadsingab/ecommerce-product-service-java:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            failureThreshold: 12
+            periodSeconds: 5
+            
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            periodSeconds: 10
+            
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            periodSeconds: 20
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          
+          env:
+            - name: ENV
+              value: production
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+            - secretRef:
+                name: ecommerce-postgres-env
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service-rds
+  namespace: microservices
+spec:
+  type: ClusterIP
+  selector:
+    app: product-rds
+  ports:
+    - port: 8081
+      targetPort: 8081
+      protocol: TCP

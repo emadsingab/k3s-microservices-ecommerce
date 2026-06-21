@@ -1,0 +1,66 @@
+environments:
+  default:
+    values:
+      - namespace: microservices-test
+
+---
+
+releases:
+  # 1. The Database Layer
+  - name: db-core
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/postgres-service
+    # This explicitly overrides the value inside postgres-service/values.yaml
+    set:
+      - name: namespace
+        value: {{ .Values.namespace }}
+    labels:
+      tier: database
+
+  # 2. The Backend Layer
+  - name: product-app
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/product-service
+    needs:
+      - {{ .Values.namespace }}/db-core
+    set:
+      - name: namespace
+        value: {{ .Values.namespace }}
+    labels:
+      tier: backend
+
+  - name: inventory-app
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/inventory-service
+    needs:
+      - {{ .Values.namespace }}/db-core
+    set:
+      - name: namespace
+        value: {{ .Values.namespace }}
+    labels:
+      tier: backend
+
+  - name: cart-app
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/cart-service
+    set:
+      - name: namespace
+        value: {{ .Values.namespace }}
+    labels:
+      tier: backend
+
+  # 3. The Frontend Layer
+  - name: frontend-app
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/frontend-service
+    needs:
+      - {{ .Values.namespace }}/product-app
+      - {{ .Values.namespace }}/inventory-app
+      - {{ .Values.namespace }}/cart-app
+    set:
+      - name: namespace
+        value: {{ .Values.namespace }}
+      - name: service.type       # <--- ADD THIS LINE
+        value: NodePort          # <--- ADD THIS LINE
+    labels:
+      tier: frontend

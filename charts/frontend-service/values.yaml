@@ -1,0 +1,30 @@
+namespace: microservices
+
+replicaCount: 3
+
+image:
+  repository: emadsingab/ecommerce-frontend
+  tag: "v1"
+  pullPolicy: Always
+
+service:
+  name: frontend-service
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+probes:
+  path: /health
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+env:
+  type: production
