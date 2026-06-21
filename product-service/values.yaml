@@ -1,0 +1,40 @@
+
+namespace: microservices
+
+replicaCount: 3
+
+image:
+  repository: emadsingab/ecommerce-product-service-java
+  tag: "v1"
+  pullPolicy: Always
+
+service:
+  name: product-service-java
+  port: 8081
+  targetPort: 8081
+
+probes:
+  path: /actuator/health
+  startup:
+    failureThreshold: 12
+    periodSeconds: 5
+  readiness:
+    periodSeconds: 10
+  liveness:
+    periodSeconds: 20
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+env:
+  type: production
+
+# References to your pre-existing infrastructure configurations
+externalConfigs:
+  configMapName: ecommerce-config
+  secretName: ecommerce-postgres-env
