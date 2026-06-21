@@ -6,17 +6,14 @@ metadata:
     app: frontend
 spec:
   replicas: 3
-
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
-
   selector:
     matchLabels:
       app: frontend
-
   template:
     metadata:
       labels:
@@ -24,7 +21,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: tarekabdelrahman1/frontend:latest
+          image: emadsingab/ecommerce-frontend:v1
           imagePullPolicy: Always
           ports:
             - containerPort: 80
