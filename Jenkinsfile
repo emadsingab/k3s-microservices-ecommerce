@@ -4,14 +4,14 @@ pipeline {
     environment {
         DOCKERHUB_USER = "emadsingab"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        NAMESPACE = "microservices-test"
+        REPO = "https://github.com/emadsingab/k3s-microservices-ecommerce.git"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git url: "https://github.com/emadsingab/k3s-microservices-ecommerce.git", branch: "main"
+                git url: "${REPO}", branch: "main"
             }
         }
 
@@ -50,7 +50,7 @@ pipeline {
         stage('Deploy with Helmfile') {
             steps {
                 sh """
-                helmfile -e default apply
+                helmfile --no-diff -e default apply
                 """
             }
         }
