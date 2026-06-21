@@ -48,6 +48,8 @@ spec:
           env:
             - name: ENV
               value: production
+            - name: env_file
+              value: product-service.env
 
 ---
 

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-postgres
+  namespace: microservices
+  labels:
+    app: ecommerce-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-postgres
+  template:
+    metadata:
+      labels:
+        app: ecommerce-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: ecommerce-postgres-env
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-postgres
+  namespace: microservices
+spec:
+  type: ClusterIP
+  selector:
+    app: ecommerce-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data-pvc
+  namespace: microservices
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
