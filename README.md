@@ -4,7 +4,7 @@ A hands-on DevOps lab project that demonstrates how to build, containerize, and 
 
 ## Architecture
 
-![K3s Microservices Ecommerce CI/CD Architecture](docs/architecture-diagram.svg)
+![K3s Microservices Ecommerce CI/CD Architecture](images/architecture-diagram.png)
 
 ## Project Overview
 
