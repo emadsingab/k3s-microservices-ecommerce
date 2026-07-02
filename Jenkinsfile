@@ -18,10 +18,10 @@ pipeline {
         stage('Build Images') {
             steps {
                 sh """
-                docker build -t $DOCKERHUB_USER/product-service-java:${IMAGE_TAG} ./product-service-java
-                docker build -t $DOCKERHUB_USER/cart-service-node:${IMAGE_TAG} ./cart-service-node
-                docker build -t $DOCKERHUB_USER/inventory-service-go:${IMAGE_TAG} ./inventory-service-go
-                docker build -t $DOCKERHUB_USER/frontend:${IMAGE_TAG} ./frontend
+                docker build -t $DOCKERHUB_USER/ecommerce-product-service-java:${IMAGE_TAG} ./product-service-java
+                docker build -t $DOCKERHUB_USER/ecommerce-cart-service-node:${IMAGE_TAG} ./cart-service-node
+                docker build -t $DOCKERHUB_USER/ecommerce-inventory-service-go:${IMAGE_TAG} ./inventory-service-go
+                docker build -t $DOCKERHUB_USER/ecommerce-frontend:${IMAGE_TAG} ./frontend
                 """
             }
         }
@@ -39,10 +39,10 @@ pipeline {
         stage('Push Images') {
             steps {
                 sh """
-                docker push $DOCKERHUB_USER/product-service-java:${IMAGE_TAG}
-                docker push $DOCKERHUB_USER/cart-service-node:${IMAGE_TAG}
-                docker push $DOCKERHUB_USER/inventory-service-go:${IMAGE_TAG}
-                docker push $DOCKERHUB_USER/frontend:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-product-service-java:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-cart-service-node:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-inventory-service-go:${IMAGE_TAG}
+                docker push $DOCKERHUB_USER/ecommerce-frontend:${IMAGE_TAG}
                 """
             }
         }
